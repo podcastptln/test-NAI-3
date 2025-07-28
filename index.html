@@ -4,51 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nota Analisa Investasi</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Libraries: PapaParse, SheetJS, Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <style>
-    /* Background Siluet Peta Indonesia */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/9/9d/Indonesia_blank.svg') center center fixed no-repeat;
-      background-size: cover;
-    }
-    /* Overlay putih transparan agar konten mudah dibaca */
-    #overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.9);
-      z-index: -1;
-    }
-    .hidden { display: none; }
-    .container {
-      max-width: 900px;
-      margin: 60px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 { color: #404040; }
-    label { display: block; margin: 8px 0 4px; font-weight: bold; }
-    input, textarea, select, button { width: 100%; padding: 8px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; }
-    button { cursor: pointer; border: none; }
-    .btn-primary { background-color: #fcb040; color: white; }
-    .btn-success { background-color: #a2c02f; color: white; }
-    .btn-danger  { background-color: #dc3545; color: white; }
-    nav { margin-bottom: 20px; }
-    nav button { width: auto; display: inline-block; margin-right: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
-    th { background: #fcb040; color: #fff; }
-    .warning { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; }
-    header { margin-bottom: 20px; }
-    header a { color: #fcb040; text-decoration: none; }
+    body { margin:0; background:url('https://upload.wikimedia.org/wikipedia/commons/9/9d/Indonesia_blank.svg') center/cover fixed; font-family:'Roboto',sans-serif; }
+    #overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(255,255,255,0.9); z-index:-1; }
+    .container { max-width:900px; margin:80px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    header { background:linear-gradient(90deg,#fcb040,#a2c02f); padding:15px; color:#fff; border-radius:8px 8px 0 0; margin:-20px -20px 20px; }
+    h1,h2,h3 { margin:0 0 15px; color:#404040; }
+    label { margin:12px 0 4px; display:block; font-weight:700; }
+    input,textarea,select,button { width:100%; padding:10px; margin-bottom:12px; border:1px solid #ccc; border-radius:4px; }
+    button { cursor:pointer; transition:background .2s,color .2s; }
+    .btn-primary { background:#fcb040;color:#fff; }
+    .btn-primary:hover { background:#e0a531; }
+    .btn-success { background:#a2c02f;color:#fff; }
+    .btn-success:hover { background:#869f28; }
+    .btn-danger { background:#dc3545;color:#fff; }
+    .btn-danger:hover { background:#b52b3a; }
+    nav { margin-bottom:20px; display:flex; gap:10px; }
+    nav button { background:transparent;border:2px solid transparent; }
+    .nav-active { border-bottom:4px solid #fcb040; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { border:1px solid #ddd; padding:8px; text-align:left; vertical-align:top; }
+    th { background:#fcb040;color:#fff; }
+    .warning { background:#fff3cd;color:#856404;padding:10px;border-radius:4px; }
+    #charts { margin-top:20px; }
+    #charts canvas { width:100%!important; height:300px!important; }
   </style>
 </head>
 <body>
   <div id="overlay"></div>
-
-  <!-- Halaman Login -->
+  <!-- Login -->
   <div id="loginContainer" class="container">
     <h1>Login Nota Analisa Investasi</h1>
     <label for="userId">User ID</label>
@@ -58,33 +48,35 @@
     <button id="loginBtn" class="btn-primary">Login</button>
     <div id="loginError" style="color:red;"></div>
   </div>
-
-  <!-- Aplikasi Utama -->
+  <!-- Aplikasi -->
   <div id="app" class="hidden">
     <div class="container">
-      <header>
-        Halo, <span id="usernameDisplay"></span>! &nbsp;(<a href="#" id="logout">Logout</a>)
-      </header>
+      <header>Halo, <span id="usernameDisplay"></span>! (<a href="#" id="logout" style="color:#fff;text-decoration:underline;">Logout</a>)</header>
       <nav>
-        <!-- Tampilkan tab sesuai role -->
         <div id="proposerTabs" class="tabs hidden">
-          <button id="tabAjukan" class="btn-primary">Ajukan Nota</button>
+          <button id="tabAjukan" class="nav-active btn-primary">Ajukan Nota</button>
           <button id="tabDaftar" class="btn-primary">Daftar Nota Saya</button>
         </div>
         <div id="reviewerTabs" class="tabs hidden">
-          <button id="tabReviewPending" class="btn-primary">Pending Review</button>
+          <button id="tabReviewPending" class="nav-active btn-primary">Pending Review</button>
           <button id="tabReviewArchive" class="btn-primary">Arsip</button>
         </div>
       </nav>
-      <!-- Proposer Interface -->
+      <!-- Proposer -->
       <div id="proposerInterface" class="hidden">
         <h2>Ajukan Nota Analisa Investasi</h2>
         <form id="notaForm">
-          <!-- Aspek Finansial CSV & Proyeksi -->
           <label>Unggah CSV Finansial</label>
           <input type="file" id="csvFinansial" accept=".csv" required>
           <label>Unggah Data Mentah & Proyeksi (CSV/XLSX)</label>
           <input type="file" id="rawDataFile" accept=".csv,.xlsx" required>
+          <!-- Grafik -->
+          <div id="charts" class="hidden">
+            <h3>Grafik Finansial</h3>
+            <canvas id="financialChart"></canvas>
+            <h3>Grafik Proyeksi</h3>
+            <canvas id="projectionChart"></canvas>
+          </div>
           <!-- Aspek Manual -->
           <label>2. Kepentingan / Objektivitas / Tujuan</label>
           <textarea id="aspek2" rows="2" required></textarea>
@@ -106,7 +98,7 @@
         </form>
         <div id="proposerList"></div>
       </div>
-      <!-- Reviewer Interface -->
+      <!-- Reviewer -->
       <div id="reviewerInterface" class="hidden">
         <h2>Review Nota</h2>
         <div id="reviewWarning" class="warning hidden"></div>
@@ -114,142 +106,163 @@
       </div>
     </div>
   </div>
-
   <script>
-    const proposerUsers = ['pengaju1','pengaju2'];
-    const reviewerUsers = ['peninjau1','peninjau2'];
-    const password = '123';
-    let currentUser = null;
+    const proposerUsers=['pengaju1','pengaju2'], reviewerUsers=['peninjau1','peninjau2'], password='123';
+    let currentUser=null, financialChart=null, projectionChart=null;
 
-    // Inisialisasi
+    // Login/logout
     document.getElementById('loginBtn').addEventListener('click', login);
-    document.getElementById('logout').addEventListener('click', () => location.reload());
-
-    function login() {
-      const uid = document.getElementById('userId').value.trim();
-      const pw  = document.getElementById('password').value;
-      if (pw !== password || (!proposerUsers.includes(uid) && !reviewerUsers.includes(uid))) {
-        document.getElementById('loginError').textContent = 'User atau password salah.';
-        return;
+    document.getElementById('logout').addEventListener('click', ()=>location.reload());
+    function login(){
+      const uid=document.getElementById('userId').value.trim(), pw=document.getElementById('password').value;
+      if(pw!==password||(!proposerUsers.includes(uid)&&!reviewerUsers.includes(uid))){
+        document.getElementById('loginError').textContent='User atau password salah.';return;
       }
-      currentUser = uid;
+      currentUser=uid;
       document.getElementById('loginContainer').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
-      document.getElementById('usernameDisplay').textContent = uid;
-      if (proposerUsers.includes(uid)) showProposer(); else showReviewer();
+      document.getElementById('usernameDisplay').textContent=uid;
+      if(proposerUsers.includes(uid)) showProposer(); else showReviewer();
     }
 
-    // Data memos di localStorage
-    function getMemos() {
-      return JSON.parse(localStorage.getItem('memos')||'[]');
-    }
-    function saveMemos(m) { localStorage.setItem('memos', JSON.stringify(m)); }
+    // LocalStorage memos
+    function getMemos(){return JSON.parse(localStorage.getItem('memos')||'[]');}
+    function saveMemos(m){localStorage.setItem('memos',JSON.stringify(m));}
 
-    // Tampilan Proposer
-    function showProposer() {
-      document.getElementById('proposerTabs').classList.remove('hidden');
-      document.getElementById('reviewerTabs').classList.add('hidden');
-      document.getElementById('tabAjukan').addEventListener('click', () => switchTab('form'));
-      document.getElementById('tabDaftar').addEventListener('click', () => switchTab('list'));
+    // Chart handlers
+    document.addEventListener('change', e=>{
+      if(e.target.id==='csvFinansial') handleCSV(e.target.files[0]);
+      if(e.target.id==='rawDataFile') handleRaw(e.target.files[0]);
+    });
+    function handleCSV(file){
+      Papa.parse(file,{header:true,dynamicTyping:true,complete(res){
+        const row=res.data[0], labels=[], values=[];
+        Object.keys(row).forEach(k=>{if(typeof row[k]==='number'){labels.push(k);values.push(row[k]);}});
+        if(labels.length){
+          document.getElementById('charts').classList.remove('hidden');
+          const ctx=document.getElementById('financialChart');
+          financialChart&&financialChart.destroy();
+          financialChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Finansial',data:values}]},options:{responsive:true}});
+        }
+      }});
+    }
+    function handleRaw(file){
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const data=new Uint8Array(e.target.result);
+        const wb=XLSX.read(data,{type:'array'});
+        const sheet=wb.Sheets[wb.SheetNames[0]];
+        const json=XLSX.utils.sheet_to_json(sheet,{header:1});
+        if(json.length>1){
+          const headers=json[0], row=json[1], labels=[], values=[];
+          headers.forEach((h,i)=>{if(typeof row[i]==='number'){labels.push(h);values.push(row[i]);}});
+          if(labels.length){
+            document.getElementById('charts').classList.remove('hidden');
+            const ctx=document.getElementById('projectionChart');
+            projectionChart&&projectionChart.destroy();
+            projectionChart=new Chart(ctx,{
+              type:'line',
+              data:{labels,datasets:[{label:'Proyeksi',data:values,fill:false,borderWidth:2}]},
+              options:{responsive:true}
+            });
+          }
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // UI helpers
+    function toggleTabs(role){
+      document.getElementById('proposerTabs').classList.toggle('hidden',role!=='proposer');
+      document.getElementById('reviewerTabs').classList.toggle('hidden',role!=='reviewer');
+    }
+    function switchTab(tab){
+      document.getElementById('proposerInterface').classList.toggle('hidden',tab!=='form');
+      document.getElementById('reviewerInterface').classList.add('hidden');
+      document.querySelectorAll('#proposerTabs button').forEach(b=>b.classList.remove('nav-active'));
+      if(tab==='form'){ document.getElementById('tabAjukan').classList.add('nav-active'); }
+      else{ document.getElementById('tabDaftar').classList.add('nav-active'); renderProposerList(); }
+    }
+
+    // Proposer
+    function showProposer(){
+      toggleTabs('proposer');
+      document.getElementById('tabAjukan').addEventListener('click',()=>switchTab('form'));
+      document.getElementById('tabDaftar').addEventListener('click',()=>switchTab('list'));
       switchTab('form');
-      document.getElementById('notaForm').addEventListener('submit', e => {
+      renderProposerList();
+      document.getElementById('notaForm').addEventListener('submit',e=>{
         e.preventDefault();
-        const memos = getMemos();
-        const id = Date.now().toString();
+        const memos=getMemos(), id=Date.now().toString();
         memos.push({
-          id, proposer: currentUser, submittedAt: new Date().toISOString(),
-          files: { csvFin: '', raw: '' },
-          aspects: { 2: document.getElementById('aspek2').value, 3: document.getElementById('aspek3').value, 4: document.getElementById('aspek4').value, 5: document.getElementById('aspek5').value, 6: document.getElementById('aspek6').value, 7: document.getElementById('aspek7').value, 8: document.getElementById('aspek8').value, 9: document.getElementById('aspek9').value },
-          reviews: { peninjau1: {}, peninjau2: {} }, status: 'Pending'
+          id, proposer:currentUser, submittedAt:new Date().toISOString(),
+          aspects:{2:document.getElementById('aspek2').value,3:document.getElementById('aspek3').value,4:document.getElementById('aspek4').value,5:document.getElementById('aspek5').value,6:document.getElementById('aspek6').value,7:document.getElementById('aspek7').value,8:document.getElementById('aspek8').value,9:document.getElementById('aspek9').value},
+          reviews:{peninjau1:{},peninjau2:{}}, status:'Pending'
         });
         saveMemos(memos); alert('Nota terkirim!'); renderProposerList();
       });
-      renderProposerList();
     }
-    function switchTab(tab) {
-      document.getElementById('proposerInterface').classList.toggle('hidden', tab!=='form');
-      document.getElementById('reviewerInterface').classList.add('hidden');
-      if (tab==='list') renderProposerList();
-    }
-    function renderProposerList() {
-      const list = getMemos().filter(m=>m.proposer===currentUser);
-      const div = document.getElementById('proposerList');
-      if (!list.length) { div.innerHTML='<p>Belum ada nota.</p>'; return; }
-      let html = '<h2>Daftar Nota Saya</h2><table><tr><th>ID</th><th>Tanggal</th><th>Status</th><th>Progress</th><th>Aksi</th></tr>';
+    function renderProposerList(){
+      const list=getMemos().filter(m=>m.proposer===currentUser), div=document.getElementById('proposerList');
+      if(!list.length){div.innerHTML='<p>Belum ada nota.</p>'; return;}      
+      let html='<h2>Daftar Nota Saya</h2><table><tr><th>ID</th><th>Tanggal</th><th>Status</th><th>Progress</th><th>Aksi</th></tr>';
       list.forEach(m=>{
-        const reviewedCount = Object.values(m.reviews).filter(r=>r.status).length;
-        html += `<tr><td>${m.id}</td><td>${new Date(m.submittedAt).toLocaleDateString()}</td><td>${m.status}</td><td>${reviewedCount}/2</td>`+
-                `<td>${m.status==='Approved'?`<button onclick="downloadMemo('${m.id}')" class='btn-primary'>Download</button>`: ''}</td></tr>`;
-      }); html += '</table>';
-      div.innerHTML = html;
+        const count=Object.values(m.reviews).filter(r=>r.status).length;
+        html+=`<tr><td>${m.id}</td><td>${new Date(m.submittedAt).toLocaleDateString()}</td><td>${m.status}</td><td>${count}/2</td>`+
+              `<td>${m.status==='Approved'?`<button onclick="downloadMemo('${m.id}')" class='btn-primary'>Download</button>`:''}</td></tr>`;
+      }); html+='</table>'; div.innerHTML=html;
     }
-    window.downloadMemo = id => {
-      const memo = getMemos().find(m=>m.id===id);
-      const blob = new Blob([JSON.stringify(memo,null,2)],{type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download=`nota_${id}.json`; a.click();
-    };
+    function downloadMemo(id){
+      const memo=getMemos().find(m=>m.id===id), blob=new Blob([JSON.stringify(memo,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=`nota_${id}.json`; a.click();
+    }
 
-    // Tampilan Reviewer
-    function showReviewer() {
-      document.getElementById('proposerTabs').classList.add('hidden');
-      document.getElementById('reviewerTabs').classList.remove('hidden');
-      document.getElementById('tabReviewPending').addEventListener('click', ()=> renderReviewList('Pending'));
-      document.getElementById('tabReviewArchive').addEventListener('click', ()=> renderReviewList('Archive'));
+    // Reviewer
+    function showReviewer(){
+      toggleTabs('reviewer');
+      document.getElementById('tabReviewPending').addEventListener('click',()=>renderReviewList('Pending'));
+      document.getElementById('tabReviewArchive').addEventListener('click',()=>renderReviewList('Archive'));
       renderReviewList('Pending');
-      setTimeout(checkReviewerDeadlines,0);
+      setTimeout(checkReviewerDeadlines,1000);
     }
-    function renderReviewList(mode) {
-      const memos = getMemos().filter(m=> mode==='Pending' ? m.status==='Pending' : m.status!=='Pending');
-      const div = document.getElementById('reviewList');
-      if (!memos.length) { div.innerHTML='<p>Tidak ada nota.</p>'; return; }
-      let html = '<table><tr><th>ID</th><th>Proposer</th><th>Tgl</th><th>Status</th><th>Progress</th><th>Aksi Review</th></tr>';
+    function renderReviewList(mode){
+      const memos=getMemos().filter(m=>mode==='Pending'?m.status==='Pending':m.status!=='Pending'), div=document.getElementById('reviewList');
+      if(!memos.length){div.innerHTML='<p>Tidak ada nota.</p>'; return;}
+      let html='<table><tr><th>ID</th><th>Proposer</th><th>Tgl</th><th>Status</th><th>Progress</th><th>Aksi Review</th></tr>';
       memos.forEach(m=>{
-        const myReview = m.reviews[currentUser];
-        const reviewedCount = Object.values(m.reviews).filter(r=>r.status).length;
-        html += `<tr><td>${m.id}</td><td>${m.proposer}</td><td>${new Date(m.submittedAt).toLocaleDateString()}</td><td>${m.status}</td><td>${reviewedCount}/2</td><td>`+
-                `<button onclick="openReview('${m.id}')" class='btn-primary'>Review</button></td></tr>`;
-      }); html += '</table>'; div.innerHTML = html;
+        const count=Object.values(m.reviews).filter(r=>r.status).length;
+        html+=`<tr><td>${m.id}</td><td>${m.proposer}</td><td>${new Date(m.submittedAt).toLocaleDateString()}</td><td>${m.status}</td><td>${count}/2</td>`+
+              `<td><button onclick="openReview('${m.id}')" class='btn-primary'>Review</button></td></tr>`;
+      }); html+='</table>'; div.innerHTML=html;
     }
-    window.openReview = id => {
-      const m = getMemos().find(x=>x.id===id);
-      const formHtml = `
-        <h3>Review Nota ${id}</h3>
-        <p>Tanggal Pengajuan: ${new Date(m.submittedAt).toLocaleDateString()}</p>
-        <label>Status Review</label>
-        <select id="rvStatus"><option value="approved">Setuju</option><option value="rejected">Tolak</option><option value="revision">Minta Revisi</option></select>
-        <label>Komentar</label>
-        <textarea id="rvComment" rows="3"></textarea>
-        <label>Aspek untuk Ditinjau Ulang (misal: 3,5)</label>
-        <input id="rvAspek" placeholder="Nomor aspek dipisah koma">
-        <button id="rvSubmit" class="btn-success">Kirim Review</button>
-      `;
-      document.getElementById('reviewList').innerHTML = formHtml;
-      document.getElementById('rvSubmit').addEventListener('click', ()=>{
-        const status = document.getElementById('rvStatus').value;
-        const comment = document.getElementById('rvComment').value;
-        const aspects = document.getElementById('rvAspek').value;
-        const memos = getMemos();
-        const memo = memos.find(x=>x.id===id);
-        memo.reviews[currentUser] = { status, comment, aspects, at: new Date().toISOString() };
-        // Update overall status
-        const revs = Object.values(memo.reviews).map(r=>r.status);
-        if (revs.includes('rejected')) memo.status = 'Revisi'; else if (revs.every(s=>'approved'===s)) memo.status = 'Approved'; else memo.status = 'Pending';
-        saveMemos(memos);
-        alert('Review terkirim'); renderReviewList('Pending');
+    function openReview(id){
+      const m=getMemos().find(x=>x.id===id), div=document.getElementById('reviewList');
+      let form=`<h3>Review Nota ${id}</h3><p>Tanggal Pengajuan: ${new Date(m.submittedAt).toLocaleDateString()}</p>`+
+               `<label>Status Review</label><select id="rvStatus"><option value="approved">Setuju</option><option value="rejected">Tolak</option><option value="revision">Minta Revisi</option></select>`+
+               `<label>Komentar</label><textarea id="rvComment" rows="3"></textarea>`+
+               `<label>Aspek untuk Ditinjau Ulang (misal: 3,5)</label><input id="rvAspek" placeholder="Nomor aspek dipisah koma">`+
+               `<button id="rvSubmit" class="btn-success">Kirim Review</button>`;
+      div.innerHTML=form;
+      document.getElementById('rvSubmit').addEventListener('click',()=>{
+        const status=document.getElementById('rvStatus').value;
+        const comment=document.getElementById('rvComment').value;
+        const aspects=document.getElementById('rvAspek').value;
+        const memos=getMemos(), memo=memos.find(x=>x.id===id);
+        memo.reviews[currentUser]={status,comment,aspects,at:new Date().toISOString()};
+        const revs=Object.values(memo.reviews).map(r=>r.status);
+        if(revs.includes('rejected')) memo.status='Revisi'; else if(revs.every(s=>'approved'===s)) memo.status='Approved'; else memo.status='Pending';
+        saveMemos(memos); alert('Review terkirim'); renderReviewList('Pending');
       });
-    };
-    function checkReviewerDeadlines() {
-      const memos = getMemos().filter(m=> m.status==='Pending');
-      const now = Date.now();
-      const warnIds = [];
-      memos.forEach(m=>{
-        const submitted = new Date(m.submittedAt).getTime();
-        if (!m.reviews[currentUser].status && now - submitted >= 3*24*60*60*1000) warnIds.push(m.id);
+    }
+    function checkReviewerDeadlines(){
+      const warnIds=[];
+      getMemos().filter(m=>m.status==='Pending').forEach(m=>{
+        const submitted=new Date(m.submittedAt).getTime();
+        if(!m.reviews[currentUser].status && Date.now()-submitted>=3*24*60*60*1000) warnIds.push(m.id);
       });
-      if (warnIds.length) {
-        const warnEl = document.getElementById('reviewWarning');
-        warnEl.textContent = 'Anda belum mereview dalam 3 hari untuk nota: '+warnIds.join(', ');
+      if(warnIds.length){
+        const warnEl=document.getElementById('reviewWarning');
+        warnEl.textContent='Anda belum mereview dalam 3 hari untuk nota: '+warnIds.join(', ');
         warnEl.classList.remove('hidden');
       }
     }
