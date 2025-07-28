@@ -5,144 +5,252 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nota Analisa Investasi</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .section { margin-bottom: 30px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input, textarea, select { width: 100%; padding: 8px; margin-bottom: 10px; }
+    /* Background Siluet Peta Indonesia */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/9/9d/Indonesia_blank.svg') center center fixed no-repeat;
+      background-size: cover;
+    }
+    /* Overlay putih transparan agar konten mudah dibaca */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.9);
+      z-index: -1;
+    }
     .hidden { display: none; }
-    .warning { color: #856404; background: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
-    .review-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .review-table th, .review-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; }
-    .btn-primary { background-color: #007bff; color: white; }
-    .btn-success { background-color: #28a745; color: white; }
-    .btn-danger { background-color: #dc3545; color: white; }
+    .container {
+      max-width: 900px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 { color: #404040; }
+    label { display: block; margin: 8px 0 4px; font-weight: bold; }
+    input, textarea, select, button { width: 100%; padding: 8px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; }
+    button { cursor: pointer; border: none; }
+    .btn-primary { background-color: #fcb040; color: white; }
+    .btn-success { background-color: #a2c02f; color: white; }
+    .btn-danger  { background-color: #dc3545; color: white; }
+    nav { margin-bottom: 20px; }
+    nav button { width: auto; display: inline-block; margin-right: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+    th { background: #fcb040; color: #fff; }
+    .warning { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; }
+    header { margin-bottom: 20px; }
+    header a { color: #fcb040; text-decoration: none; }
   </style>
 </head>
 <body>
-  <h1>Nota Analisa Investasi</h1>
-  <div id="warning" class="warning hidden"></div>
+  <div id="overlay"></div>
 
-  <!-- Proposer Form -->
-  <form id="proposerForm">
-    <div class="section">
-      <h2>1. Finansial / Bisnis</h2>
-      <label for="csvInput">Unggah file CSV (hanya aspek finansial)</label>
-      <input type="file" id="csvInput" accept=".csv" required>
-      <small>Format: EBITDA Margin, Net Profit Margin, ROE, dll.</small>
-    </div>
-    <div class="section">
-      <h2>2. Kepentingan / Objektivitas / Tujuan</h2>
-      <textarea id="aspek2" rows="4" placeholder="Jelaskan ringkas aspek Kepentingan/Objektivitas/Tujuan..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>3. Lingkungan, Sosial, dan Ekonomi</h2>
-      <textarea id="aspek3" rows="4" placeholder="Jelaskan ringkas aspek Sosial dan Ekonomi..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>4. Fiskal</h2>
-      <textarea id="aspek4" rows="4" placeholder="Jelaskan ringkas aspek Fiskal..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>5. Pelayanan dan Operasional</h2>
-      <textarea id="aspek5" rows="4" placeholder="Jelaskan ringkas aspek Pelayanan dan Operasional..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>6. Legal</h2>
-      <textarea id="aspek6" rows="4" placeholder="Jelaskan ringkas aspek Legal..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>7. Manajemen Risiko</h2>
-      <textarea id="aspek7" rows="4" placeholder="Jelaskan ringkas Manajemen Risiko..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>8. Corporate Governance & Compliance</h2>
-      <textarea id="aspek8" rows="4" placeholder="Jelaskan ringkas Corporate Governance & Compliance..." required></textarea>
-    </div>
-    <div class="section">
-      <h2>9. Aspek Lainnya</h2>
-      <textarea id="aspek9" rows="4" placeholder="Parameter lain (opsional)..."></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary">Kirim Nota</button>
-  </form>
+  <!-- Halaman Login -->
+  <div id="loginContainer" class="container">
+    <h1>Login Nota Analisa Investasi</h1>
+    <label for="userId">User ID</label>
+    <input type="text" id="userId" placeholder="Masukkan User ID">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Masukkan Password">
+    <button id="loginBtn" class="btn-primary">Login</button>
+    <div id="loginError" style="color:red;"></div>
+  </div>
 
-  <!-- Committee Review -->
-  <div id="reviewSection" class="hidden">
-    <h2>Review Komite</h2>
-    <table class="review-table">
-      <thead>
-        <tr><th>Nama Komite</th><th>Komentar</th><th>Status</th></tr>
-      </thead>
-      <tbody id="committeeList">
-        <!-- JavaScript will populate committee members -->
-      </tbody>
-    </table>
-    <button id="approveBtn" class="btn btn-success">Setujui</button>
-    <button id="rejectBtn" class="btn btn-danger">Tolak</button>
+  <!-- Aplikasi Utama -->
+  <div id="app" class="hidden">
+    <div class="container">
+      <header>
+        Halo, <span id="usernameDisplay"></span>! &nbsp;(<a href="#" id="logout">Logout</a>)
+      </header>
+      <nav>
+        <!-- Tampilkan tab sesuai role -->
+        <div id="proposerTabs" class="tabs hidden">
+          <button id="tabAjukan" class="btn-primary">Ajukan Nota</button>
+          <button id="tabDaftar" class="btn-primary">Daftar Nota Saya</button>
+        </div>
+        <div id="reviewerTabs" class="tabs hidden">
+          <button id="tabReviewPending" class="btn-primary">Pending Review</button>
+          <button id="tabReviewArchive" class="btn-primary">Arsip</button>
+        </div>
+      </nav>
+      <!-- Proposer Interface -->
+      <div id="proposerInterface" class="hidden">
+        <h2>Ajukan Nota Analisa Investasi</h2>
+        <form id="notaForm">
+          <!-- Aspek Finansial CSV & Proyeksi -->
+          <label>Unggah CSV Finansial</label>
+          <input type="file" id="csvFinansial" accept=".csv" required>
+          <label>Unggah Data Mentah & Proyeksi (CSV/XLSX)</label>
+          <input type="file" id="rawDataFile" accept=".csv,.xlsx" required>
+          <!-- Aspek Manual -->
+          <label>2. Kepentingan / Objektivitas / Tujuan</label>
+          <textarea id="aspek2" rows="2" required></textarea>
+          <label>3. Lingkungan, Sosial, dan Ekonomi</label>
+          <textarea id="aspek3" rows="2" required></textarea>
+          <label>4. Fiskal</label>
+          <textarea id="aspek4" rows="2" required></textarea>
+          <label>5. Pelayanan dan Operasional</label>
+          <textarea id="aspek5" rows="2" required></textarea>
+          <label>6. Legal</label>
+          <textarea id="aspek6" rows="2" required></textarea>
+          <label>7. Manajemen Risiko</label>
+          <textarea id="aspek7" rows="2" required></textarea>
+          <label>8. Corporate Governance & Compliance</label>
+          <textarea id="aspek8" rows="2" required></textarea>
+          <label>9. Aspek Lainnya (opsional)</label>
+          <textarea id="aspek9" rows="2"></textarea>
+          <button type="submit" class="btn-success">Submit Nota</button>
+        </form>
+        <div id="proposerList"></div>
+      </div>
+      <!-- Reviewer Interface -->
+      <div id="reviewerInterface" class="hidden">
+        <h2>Review Nota</h2>
+        <div id="reviewWarning" class="warning hidden"></div>
+        <div id="reviewList"></div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // Contoh data komite
-    const committees = [ 'Komite A', 'Komite B', 'Komite C' ];
-    let submittedAt;
-    const reviewerDelayWarning = 3 * 24 * 60 * 60 * 1000; // 3 hari
-    const autoNotifyDelay = 5 * 24 * 60 * 60 * 1000; // 5 hari
+    const proposerUsers = ['pengaju1','pengaju2'];
+    const reviewerUsers = ['peninjau1','peninjau2'];
+    const password = '123';
+    let currentUser = null;
 
-    document.getElementById('proposerForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      // Cek semua input sudah terisi
-      const csvFile = document.getElementById('csvInput').files[0];
-      if (!csvFile) { alert('Harap unggah file CSV finansial.'); return; }
-      for (let i = 2; i <= 8; i++) {
-        if (!document.getElementById('aspek' + i).value.trim()) {
-          alert('Harap isi semua aspek kecuali Aspek Lainnya.'); return;
-        }
-      }
-      submittedAt = new Date();
-      // Tampilkan section review
-      document.getElementById('reviewSection').classList.remove('hidden');
-      const tbody = document.getElementById('committeeList');
-      committees.forEach(name => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${name}</td>
-                         <td><textarea rows='2' placeholder='Masukkan komentar...'></textarea></td>
-                         <td><select><option value=''>- Pilih -</option><option value='setuju'>Setuju</option><option value='tolak'>Tolak</option></select></td>`;
-        tbody.appendChild(row);
-      });
-      checkDeadlines();
-    });
+    // Inisialisasi
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('logout').addEventListener('click', () => location.reload());
 
-    function checkDeadlines() {
-      const now = new Date();
-      const diff = now - submittedAt;
-      const warningEl = document.getElementById('warning');
-      if (diff >= autoNotifyDelay) {
-        // Auto-notify proposer
-        const pending = [];
-        document.querySelectorAll('#committeeList tr').forEach((tr, idx) => {
-          const status = tr.querySelector('select').value;
-          if (!status) pending.push(committees[idx]);
-        });
-        alert('Peringatan: Komite berikut belum memberikan review: ' + pending.join(', '));
-        warningEl.textContent = 'Review otomatis dikirim ke Proposer. Silakan cek komentar komite.';
-        warningEl.classList.remove('hidden');
-      } else if (diff >= reviewerDelayWarning) {
-        warningEl.textContent = 'Peringatan: Anda belum melakukan review dalam 3 hari.';
-        warningEl.classList.remove('hidden');
-        setTimeout(checkDeadlines, reviewerDelayWarning); // cek lagi
-      } else {
-        setTimeout(checkDeadlines, reviewerDelayWarning - diff);
+    function login() {
+      const uid = document.getElementById('userId').value.trim();
+      const pw  = document.getElementById('password').value;
+      if (pw !== password || (!proposerUsers.includes(uid) && !reviewerUsers.includes(uid))) {
+        document.getElementById('loginError').textContent = 'User atau password salah.';
+        return;
       }
+      currentUser = uid;
+      document.getElementById('loginContainer').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('usernameDisplay').textContent = uid;
+      if (proposerUsers.includes(uid)) showProposer(); else showReviewer();
     }
 
-    // Tombol approve/reject
-    document.getElementById('approveBtn').addEventListener('click', () => handleDecision('setuju'));
-    document.getElementById('rejectBtn').addEventListener('click', () => handleDecision('tolak'));
+    // Data memos di localStorage
+    function getMemos() {
+      return JSON.parse(localStorage.getItem('memos')||'[]');
+    }
+    function saveMemos(m) { localStorage.setItem('memos', JSON.stringify(m)); }
 
-    function handleDecision(decision) {
-      if (confirm('Yakin ingin ' + (decision==='setuju'?'menyetujui':'menolak') + ' NAI ini?')) {
-        alert('NAI telah ' + (decision==='setuju'?'disetujui':'ditolak') + '.');
-        // Di sini bisa ditambahkan logika penyimpanan keputusan
+    // Tampilan Proposer
+    function showProposer() {
+      document.getElementById('proposerTabs').classList.remove('hidden');
+      document.getElementById('reviewerTabs').classList.add('hidden');
+      document.getElementById('tabAjukan').addEventListener('click', () => switchTab('form'));
+      document.getElementById('tabDaftar').addEventListener('click', () => switchTab('list'));
+      switchTab('form');
+      document.getElementById('notaForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const memos = getMemos();
+        const id = Date.now().toString();
+        memos.push({
+          id, proposer: currentUser, submittedAt: new Date().toISOString(),
+          files: { csvFin: '', raw: '' },
+          aspects: { 2: document.getElementById('aspek2').value, 3: document.getElementById('aspek3').value, 4: document.getElementById('aspek4').value, 5: document.getElementById('aspek5').value, 6: document.getElementById('aspek6').value, 7: document.getElementById('aspek7').value, 8: document.getElementById('aspek8').value, 9: document.getElementById('aspek9').value },
+          reviews: { peninjau1: {}, peninjau2: {} }, status: 'Pending'
+        });
+        saveMemos(memos); alert('Nota terkirim!'); renderProposerList();
+      });
+      renderProposerList();
+    }
+    function switchTab(tab) {
+      document.getElementById('proposerInterface').classList.toggle('hidden', tab!=='form');
+      document.getElementById('reviewerInterface').classList.add('hidden');
+      if (tab==='list') renderProposerList();
+    }
+    function renderProposerList() {
+      const list = getMemos().filter(m=>m.proposer===currentUser);
+      const div = document.getElementById('proposerList');
+      if (!list.length) { div.innerHTML='<p>Belum ada nota.</p>'; return; }
+      let html = '<h2>Daftar Nota Saya</h2><table><tr><th>ID</th><th>Tanggal</th><th>Status</th><th>Progress</th><th>Aksi</th></tr>';
+      list.forEach(m=>{
+        const reviewedCount = Object.values(m.reviews).filter(r=>r.status).length;
+        html += `<tr><td>${m.id}</td><td>${new Date(m.submittedAt).toLocaleDateString()}</td><td>${m.status}</td><td>${reviewedCount}/2</td>`+
+                `<td>${m.status==='Approved'?`<button onclick="downloadMemo('${m.id}')" class='btn-primary'>Download</button>`: ''}</td></tr>`;
+      }); html += '</table>';
+      div.innerHTML = html;
+    }
+    window.downloadMemo = id => {
+      const memo = getMemos().find(m=>m.id===id);
+      const blob = new Blob([JSON.stringify(memo,null,2)],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`nota_${id}.json`; a.click();
+    };
+
+    // Tampilan Reviewer
+    function showReviewer() {
+      document.getElementById('proposerTabs').classList.add('hidden');
+      document.getElementById('reviewerTabs').classList.remove('hidden');
+      document.getElementById('tabReviewPending').addEventListener('click', ()=> renderReviewList('Pending'));
+      document.getElementById('tabReviewArchive').addEventListener('click', ()=> renderReviewList('Archive'));
+      renderReviewList('Pending');
+      setTimeout(checkReviewerDeadlines,0);
+    }
+    function renderReviewList(mode) {
+      const memos = getMemos().filter(m=> mode==='Pending' ? m.status==='Pending' : m.status!=='Pending');
+      const div = document.getElementById('reviewList');
+      if (!memos.length) { div.innerHTML='<p>Tidak ada nota.</p>'; return; }
+      let html = '<table><tr><th>ID</th><th>Proposer</th><th>Tgl</th><th>Status</th><th>Progress</th><th>Aksi Review</th></tr>';
+      memos.forEach(m=>{
+        const myReview = m.reviews[currentUser];
+        const reviewedCount = Object.values(m.reviews).filter(r=>r.status).length;
+        html += `<tr><td>${m.id}</td><td>${m.proposer}</td><td>${new Date(m.submittedAt).toLocaleDateString()}</td><td>${m.status}</td><td>${reviewedCount}/2</td><td>`+
+                `<button onclick="openReview('${m.id}')" class='btn-primary'>Review</button></td></tr>`;
+      }); html += '</table>'; div.innerHTML = html;
+    }
+    window.openReview = id => {
+      const m = getMemos().find(x=>x.id===id);
+      const formHtml = `
+        <h3>Review Nota ${id}</h3>
+        <p>Tanggal Pengajuan: ${new Date(m.submittedAt).toLocaleDateString()}</p>
+        <label>Status Review</label>
+        <select id="rvStatus"><option value="approved">Setuju</option><option value="rejected">Tolak</option><option value="revision">Minta Revisi</option></select>
+        <label>Komentar</label>
+        <textarea id="rvComment" rows="3"></textarea>
+        <label>Aspek untuk Ditinjau Ulang (misal: 3,5)</label>
+        <input id="rvAspek" placeholder="Nomor aspek dipisah koma">
+        <button id="rvSubmit" class="btn-success">Kirim Review</button>
+      `;
+      document.getElementById('reviewList').innerHTML = formHtml;
+      document.getElementById('rvSubmit').addEventListener('click', ()=>{
+        const status = document.getElementById('rvStatus').value;
+        const comment = document.getElementById('rvComment').value;
+        const aspects = document.getElementById('rvAspek').value;
+        const memos = getMemos();
+        const memo = memos.find(x=>x.id===id);
+        memo.reviews[currentUser] = { status, comment, aspects, at: new Date().toISOString() };
+        // Update overall status
+        const revs = Object.values(memo.reviews).map(r=>r.status);
+        if (revs.includes('rejected')) memo.status = 'Revisi'; else if (revs.every(s=>'approved'===s)) memo.status = 'Approved'; else memo.status = 'Pending';
+        saveMemos(memos);
+        alert('Review terkirim'); renderReviewList('Pending');
+      });
+    };
+    function checkReviewerDeadlines() {
+      const memos = getMemos().filter(m=> m.status==='Pending');
+      const now = Date.now();
+      const warnIds = [];
+      memos.forEach(m=>{
+        const submitted = new Date(m.submittedAt).getTime();
+        if (!m.reviews[currentUser].status && now - submitted >= 3*24*60*60*1000) warnIds.push(m.id);
+      });
+      if (warnIds.length) {
+        const warnEl = document.getElementById('reviewWarning');
+        warnEl.textContent = 'Anda belum mereview dalam 3 hari untuk nota: '+warnIds.join(', ');
+        warnEl.classList.remove('hidden');
       }
     }
   </script>
