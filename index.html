@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nota Analisa Investasi</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .section { margin-bottom: 30px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, textarea, select { width: 100%; padding: 8px; margin-bottom: 10px; }
+    .hidden { display: none; }
+    .warning { color: #856404; background: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+    .review-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .review-table th, .review-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Nota Analisa Investasi</h1>
+  <div id="warning" class="warning hidden"></div>
+
+  <!-- Proposer Form -->
+  <form id="proposerForm">
+    <div class="section">
+      <h2>1. Finansial / Bisnis</h2>
+      <label for="csvInput">Unggah file CSV (hanya aspek finansial)</label>
+      <input type="file" id="csvInput" accept=".csv" required>
+      <small>Format: EBITDA Margin, Net Profit Margin, ROE, dll.</small>
+    </div>
+    <div class="section">
+      <h2>2. Kepentingan / Objektivitas / Tujuan</h2>
+      <textarea id="aspek2" rows="4" placeholder="Jelaskan ringkas aspek Kepentingan/Objektivitas/Tujuan..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>3. Lingkungan, Sosial, dan Ekonomi</h2>
+      <textarea id="aspek3" rows="4" placeholder="Jelaskan ringkas aspek Sosial dan Ekonomi..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>4. Fiskal</h2>
+      <textarea id="aspek4" rows="4" placeholder="Jelaskan ringkas aspek Fiskal..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>5. Pelayanan dan Operasional</h2>
+      <textarea id="aspek5" rows="4" placeholder="Jelaskan ringkas aspek Pelayanan dan Operasional..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>6. Legal</h2>
+      <textarea id="aspek6" rows="4" placeholder="Jelaskan ringkas aspek Legal..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>7. Manajemen Risiko</h2>
+      <textarea id="aspek7" rows="4" placeholder="Jelaskan ringkas Manajemen Risiko..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>8. Corporate Governance & Compliance</h2>
+      <textarea id="aspek8" rows="4" placeholder="Jelaskan ringkas Corporate Governance & Compliance..." required></textarea>
+    </div>
+    <div class="section">
+      <h2>9. Aspek Lainnya</h2>
+      <textarea id="aspek9" rows="4" placeholder="Parameter lain (opsional)..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Kirim Nota</button>
+  </form>
+
+  <!-- Committee Review -->
+  <div id="reviewSection" class="hidden">
+    <h2>Review Komite</h2>
+    <table class="review-table">
+      <thead>
+        <tr><th>Nama Komite</th><th>Komentar</th><th>Status</th></tr>
+      </thead>
+      <tbody id="committeeList">
+        <!-- JavaScript will populate committee members -->
+      </tbody>
+    </table>
+    <button id="approveBtn" class="btn btn-success">Setujui</button>
+    <button id="rejectBtn" class="btn btn-danger">Tolak</button>
+  </div>
+
+  <script>
+    // Contoh data komite
+    const committees = [ 'Komite A', 'Komite B', 'Komite C' ];
+    let submittedAt;
+    const reviewerDelayWarning = 3 * 24 * 60 * 60 * 1000; // 3 hari
+    const autoNotifyDelay = 5 * 24 * 60 * 60 * 1000; // 5 hari
+
+    document.getElementById('proposerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // Cek semua input sudah terisi
+      const csvFile = document.getElementById('csvInput').files[0];
+      if (!csvFile) { alert('Harap unggah file CSV finansial.'); return; }
+      for (let i = 2; i <= 8; i++) {
+        if (!document.getElementById('aspek' + i).value.trim()) {
+          alert('Harap isi semua aspek kecuali Aspek Lainnya.'); return;
+        }
+      }
+      submittedAt = new Date();
+      // Tampilkan section review
+      document.getElementById('reviewSection').classList.remove('hidden');
+      const tbody = document.getElementById('committeeList');
+      committees.forEach(name => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${name}</td>
+                         <td><textarea rows='2' placeholder='Masukkan komentar...'></textarea></td>
+                         <td><select><option value=''>- Pilih -</option><option value='setuju'>Setuju</option><option value='tolak'>Tolak</option></select></td>`;
+        tbody.appendChild(row);
+      });
+      checkDeadlines();
+    });
+
+    function checkDeadlines() {
+      const now = new Date();
+      const diff = now - submittedAt;
+      const warningEl = document.getElementById('warning');
+      if (diff >= autoNotifyDelay) {
+        // Auto-notify proposer
+        const pending = [];
+        document.querySelectorAll('#committeeList tr').forEach((tr, idx) => {
+          const status = tr.querySelector('select').value;
+          if (!status) pending.push(committees[idx]);
+        });
+        alert('Peringatan: Komite berikut belum memberikan review: ' + pending.join(', '));
+        warningEl.textContent = 'Review otomatis dikirim ke Proposer. Silakan cek komentar komite.';
+        warningEl.classList.remove('hidden');
+      } else if (diff >= reviewerDelayWarning) {
+        warningEl.textContent = 'Peringatan: Anda belum melakukan review dalam 3 hari.';
+        warningEl.classList.remove('hidden');
+        setTimeout(checkDeadlines, reviewerDelayWarning); // cek lagi
+      } else {
+        setTimeout(checkDeadlines, reviewerDelayWarning - diff);
+      }
+    }
+
+    // Tombol approve/reject
+    document.getElementById('approveBtn').addEventListener('click', () => handleDecision('setuju'));
+    document.getElementById('rejectBtn').addEventListener('click', () => handleDecision('tolak'));
+
+    function handleDecision(decision) {
+      if (confirm('Yakin ingin ' + (decision==='setuju'?'menyetujui':'menolak') + ' NAI ini?')) {
+        alert('NAI telah ' + (decision==='setuju'?'disetujui':'ditolak') + '.');
+        // Di sini bisa ditambahkan logika penyimpanan keputusan
+      }
+    }
+  </script>
+</body>
+</html>
